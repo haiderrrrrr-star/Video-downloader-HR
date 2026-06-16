@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محمل الوسائط المتعددة - إصدار الـ Collage</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* خلفية مستوحاة من ألوان السجاد العراقي العتيق بالصورة */
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle, #3d0c13 0%, #1a0306 70%, #0a0102 100%);
+    background-color: #1a0306;
+    font-family: "Times New Roman", Georgia, serif, system-ui;
+    color: #2b1a11;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 16px;
+    position: relative;
+  }
+
+  /* تأثير ورقة قديمة مقتطعة ومثبتة بشريط لاصق */
+  .container {
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+  }
+
+  /* قصاصة "صنع في العراق" المقتبسة من صورتك تماماً */
+  .iraq-badge {
+    background: #e6dfcc;
+    border: 1px dashed #b5a88f;
+    padding: 8px 24px;
+    text-align: center;
+    margin: 0 auto 25px auto;
+    width: fit-content;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    transform: rotate(-1deg);
+  }
+  .iraq-badge .arabic {
+    font-size: 19px;
+    font-weight: bold;
+    color: #1f140e;
+    letter-spacing: 1px;
+  }
+  .iraq-badge .english {
+    font-size: 11px;
+    color: #5c4f3c;
+    font-family: monospace;
+    margin-top: 2px;
+  }
+
+  /* الكارت الرئيسي: مصمم كأنه ورقة بولاريد أو قصاصة مجلة عتيقة */
+  .card {
+    background: #f4efe2; /* لون الورق القديم */
+    border-radius: 4px;
+    padding: 30px 24px;
+    box-shadow: 5px 5px 25px rgba(0,0,0,0.6);
+    position: relative;
+    border: 1px solid #dcd3be;
+  }
+
+  /* تأثير التيب (الشريط اللاصق) في أعلى الكارت */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%) rotate(1deg);
+    width: 110px;
+    height: 28px;
+    background: rgba(227, 215, 186, 0.6);
+    backdrop-filter: blur(1px);
+    border-left: 3px dashed rgba(0,0,0,0.05);
+    border-right: 3px dashed rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  h1 { 
+    font-size: 22px; 
+    color: #1f140e; 
+    font-weight: 800; 
+    text-align: center;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #e0d7c1;
+    padding-bottom: 10px;
+  }
+  .sub { font-size: 12px; color: #70624d; text-align: center; margin-bottom: 24px; italic; }
+
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; color: #4a3b2c; margin-bottom: 6px; font-weight: 700; }
+  
+  /* حقل الإدخال بطابع عتيق */
+  input[type="url"] {
+    width: 100%;
+    padding: 12px;
+    background: #ebe4d3;
+    border: 1px solid #c2b79e;
+    border-radius: 2px;
+    color: #1f140e;
+    font-size: 14px;
+    outline: none;
+    font-family: monospace;
+  }
+  input[type="url"]:focus { border-color: #4a3b2c; background: #fff; }
+
+  /* أزرار اختيار النوع كأنها طوابع أو تبويبات قديمة */
+  .type-selector {
+    display: flex;
+    gap: 4px;
+    background: #ebe4d3;
+    padding: 3px;
+    border: 1px solid #c2b79e;
+  }
+  .type-btn {
+    flex: 1;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: #70624d;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .type-btn.active { background: #2b1a11; color: #f4efe2; }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    background: #ebe4d3;
+    border: 1px solid #c2b79e;
+    color: #1f140e;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* زر التحميل مصمم كبوستر غامق مميز */
+  #downloadBtn {
+    width: 100%;
+    padding: 14px;
+    background: #2b1a11;
+    border: 1px solid #1f140e;
+    color: #f4efe2;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+  #downloadBtn:hover { background: #422b1f; }
+  #downloadBtn:disabled { background: #d0c8b5; color: #9c927d; border-color: #c2b79e; cursor: not-allowed; }
+
+  /* رسائل التنبيه متناسقة مع ألوان الورق والجرائد */
+  #msg {
+    margin-top: 18px; padding: 12px; 
+    font-size: 13px; text-align: center; display: none; line-height: 1.5;
+  }
+  .info    { background: #e3ecf5; border: 1px solid #b3c7db; color: #2d4b6b; }
+  .success { background: #e3f5e9; border: 1px solid #b3dbbe; color: #1e522b; }
+  .error   { background: #f5e3e3; border: 1px solid #dbb3b3; color: #6b2d2d; }
+  
+  .success-link {
+    display: inline-block; margin-top: 8px; padding: 6px 14px;
+    background: #2b1a11; color: #f4efe2; text-decoration: none;
+    font-size: 12px; font-weight: 700;
+  }
+
+  .footer { margin-top: 30px; font-size: 11px; color: #8a686d; text-align: center; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="iraq-badge">
+    <div class="arabic">صُنِعَ فِي العِرَاق</div>
+    <div class="english">Made in Iraq</div>
+  </div>
+
+  <div class="card">
+    <h1>مُسْتَخْرِجُ الوَسَائِطِ المُرْئِيَّةِ</h1>
+    <div class="sub">إصدار التجميع الفني العتيق (يدعم 4K)</div>
+
+    <div class="form-group">
+      <label for="urlInput">أدخل رابط المادة (يوتيوب، تيك توك، إنستغرام...)</label>
+      <input type="url" id="urlInput" placeholder="ضع الرابط هنا..." autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label>نوع الاستخراج المطلوب</label>
+      <div class="type-selector">
+        <button class="type-btn active" onclick="setDownloadType('video')">فيديو كامل</button>
+        <button class="type-btn" onclick="setDownloadType('mute')">فيديو صامت</button>
+        <button class="type-btn" onclick="setDownloadType('audio')">صوت فقط</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label id="qualityLabel" for="qualitySelect">الجودة المتاحة</label>
+      <select id="qualitySelect">
+        </select>
+    </div>
+
+    <button id="downloadBtn" onclick="startDownload()">بَدْءُ اسْتِخْرَاجِ المَلَفِّ ⚡</button>
+    
+    <div id="msg"></div>
+  </div>
+
+  <p class="footer">المعالجة تتم عبر سيرفرات سحابية مفتوحة ومحمية بالكامل.</p>
+</div>
+
+<script>
+  let currentType = 'video';
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateQualityOptions();
+  });
+
+  function setDownloadType(type) {
+    currentType = type;
+    const buttons = document.querySelectorAll('.type-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if(type === 'video') buttons[0].classList.add('active');
+    if(type === 'mute') buttons[1].classList.add('active');
+    if(type === 'audio') buttons[2].classList.add('active');
+
+    updateQualityOptions();
+  }
+
+  function updateQualityOptions() {
+    const select = document.getElementById('qualitySelect');
+    const label = document.getElementById('qualityLabel');
+    select.innerHTML = '';
+
+    if (currentType === 'video' || currentType === 'mute') {
+      label.textContent = "تحديد أبعاد ومستوى جودة العرض:";
+      const videoOptions = [
+        { text: 'أعلى جودة متوفرة تلقائياً (Max / 4K)', value: 'max' },
+        { text: '4K Ultra HD (2160p)', value: '2160' },
+        { text: '2K Quad HD (1440p)', value: '1440' },
+        { text: '1080p Full HD', value: '1080' },
+        { text: '720p HD', value: '720' },
+        { text: '480p Standard', value: '480' }
+      ];
+      videoOptions.forEach(opt => {
+        select.options.add(new Option(opt.text, opt.value));
+      });
+    } else if (currentType === 'audio') {
+      label.textContent = "تحديد صيغة النقاء الصوتي:";
+      const audioOptions = [
+        { text: 'MP3 (نقاء عالي جداً - 320kbps)', value: 'mp3' },
+        { text: 'M4A (مضغوط ومتوافق)', value: 'm4a' },
+        { text: 'WAV (استوديو أصلي غير مضغوط)', value: 'wav' }
+      ];
+      audioOptions.forEach(opt => {
+        select.options.add(new Option(opt.text, opt.value));
+      });
+    }
+  }
+
+  async function startDownload() {
+    const urlInput = document.getElementById('urlInput').value.trim();
+    const quality = document.getElementById('qualitySelect').value;
+    const btn = document.getElementById('downloadBtn');
+
+    if (!urlInput) {
+      showMsg('❌ يرجى تزويدنا برابط صحيح ليتم فحصه.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    showMsg('⏳ جاري إرسال الطلب للسيرفر لفك التشفير وسحب الجودة المحددة...', 'info');
+
+    const requestData = {
+      url: urlInput,
+      videoQuality: (currentType === 'video' || currentType === 'mute') ? quality : '1080',
+      audioFormat: currentType === 'audio' ? quality : 'mp3',
+      audioBitrate: '320',
+      isAudioOnly: currentType === 'audio',
+      isNoAudio: currentType === 'mute'
+    };
+
+    try {
+      const response = await fetch('https://api.cobalt.tools/api/json', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'redirect' || result.status === 'stream') {
+        showMsg(`
+          🎉 تم تجهيز مسار الملف بنجاح العالي!<br>
+          <a href="${result.url}" target="_blank" class="success-link">اضغط هنا لتحميل الملف مباشرة</a>
+        `, 'success');
+      } else if (result.status === 'error') {
+        showMsg(`❌ عذراً، رفض السيرفر الطلب. السبب: ${result.text}`, 'error');
+      } else {
+        showMsg('❌ حدث خطأ غير متوقع أثناء القراءة، جرب لاحقاً.', 'error');
+      }
+    } catch (error) {
+      console.error(error);
+      showMsg('❌ فشل الاتصال بالبوابة السحابية، تأكد من أن الرابط مدعوم.', 'error');
+    }
+
+    btn.disabled = false;
+  }
+
+  function showMsg(text, type) {
+    const msg = document.getElementById('msg');
+    msg.innerHTML = text;
+    msg.className = type;
+    msg.style.display = 'block';
+  }
+</script>
+</body>
+</html>
