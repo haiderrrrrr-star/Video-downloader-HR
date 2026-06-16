@@ -87,7 +87,7 @@
     border-bottom: 1px solid #e0d7c1;
     padding-bottom: 10px;
   }
-  .sub { font-size: 12px; color: #70624d; text-align: center; margin-bottom: 24px; italic; }
+  .sub { font-size: 12px; color: #70624d; text-align: center; margin-bottom: 24px; font-style: italic; }
 
   .form-group { margin-bottom: 18px; }
   label { display: block; font-size: 13px; color: #4a3b2c; margin-bottom: 6px; font-weight: 700; }
@@ -201,9 +201,9 @@
     </div>
 
     <div class="form-group">
-      <label id="qualityLabel" for="qualitySelect">الجودة المتاحة</label>
+      <label id="qualityLabel" for="qualitySelect">تحديد أبعاد ومستوى جودة العرض:</label>
       <select id="qualitySelect">
-        </select>
+      </select>
     </div>
 
     <button id="downloadBtn" onclick="startDownload()">بَدْءُ اسْتِخْرَاجِ المَلَفِّ ⚡</button>
@@ -216,6 +216,15 @@
 
 <script>
   let currentType = 'video';
+
+  // قائمة بسيرفرات Cobalt العامة والمفتوحة كاحتياطي لتفادي قيود الحظر و CORS
+  const apiInstances = [
+    'https://cobalt.api.g7kk.com/api/json',
+    'https://api.justput.in/api/json',
+    'https://api.cobalt.tools/api/json',
+    'https://cobalt.lonami.dev/api/json',
+    'https://cobalt.wuk.sh/api/json'
+  ];
 
   document.addEventListener("DOMContentLoaded", () => {
     updateQualityOptions();
@@ -275,7 +284,7 @@
     }
 
     btn.disabled = true;
-    showMsg('⏳ جاري إرسال الطلب للسيرفر لفك التشفير وسحب الجودة المحددة...', 'info');
+    showMsg('⏳ جاري جلب البيانات والاتصال بالسيرفرات السحابية المفتوحة...', 'info');
 
     const requestData = {
       url: urlInput,
@@ -286,31 +295,43 @@
       isNoAudio: currentType === 'mute'
     };
 
-    try {
-      const response = await fetch('https://api.cobalt.tools/api/json', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      });
+    let isProcessed = false;
 
-      const result = await response.json();
+    // نظام التحويل التلقائي (Automatic Fallback System)
+    for (let i = 0; i < apiInstances.length; i++) {
+      try {
+        const response = await fetch(apiInstances[i], {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
 
-      if (result.status === 'redirect' || result.status === 'stream') {
-        showMsg(`
-          🎉 تم تجهيز مسار الملف بنجاح العالي!<br>
-          <a href="${result.url}" target="_blank" class="success-link">اضغط هنا لتحميل الملف مباشرة</a>
-        `, 'success');
-      } else if (result.status === 'error') {
-        showMsg(`❌ عذراً، رفض السيرفر الطلب. السبب: ${result.text}`, 'error');
-      } else {
-        showMsg('❌ حدث خطأ غير متوقع أثناء القراءة، جرب لاحقاً.', 'error');
+        if (!response.ok) throw new Error('Network error');
+
+        const result = await response.json();
+
+        if (result.status === 'redirect' || result.status === 'stream') {
+          showMsg(`
+            🎉 تم تجهيز مسار الملف بنجاح!<br>
+            <a href="${result.url}" target="_blank" class="success-link">اضغط هنا لتحميل الملف مباشرة</a>
+          `, 'success');
+          isProcessed = true;
+          break; 
+        } else if (result.status === 'error') {
+          showMsg(`❌ عذراً، رفض السيرفر الطلب. السبب: ${result.text}`, 'error');
+          isProcessed = true;
+          break; 
+        }
+      } catch (error) {
+        console.warn(`السيرفر رقم ${i + 1} واجه قيود اتصال، جاري الانتقال للبديل...`);
       }
-    } catch (error) {
-      console.error(error);
-      showMsg('❌ فشل الاتصال بالبوابة السحابية، تأكد من أن الرابط مدعوم.', 'error');
+    }
+
+    if (!isProcessed) {
+      showMsg('❌ السيرفرات الرسمية تفرض قيوداً حالياً. يرجى تجربة الرابط مرة أخرى بعد ثوانٍ أو استخدام متصفح يدعم تجاوز حماية CORS.', 'error');
     }
 
     btn.disabled = false;
